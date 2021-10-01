@@ -25,12 +25,22 @@ def pixel_to_ascii50(image):
     return asciiString
 
 
-def convert_image_to_ASCII(filename, scale, moreChars):
+def convert_image_to_ASCII(filename, scaling, moreChars):
+    try:
+        Image.open(filename)
+    except FileNotFoundError:
+        print("Файл не найден")
+        exit(-11)
     image = Image.open(filename)
     width, height = image.size
-    if scale:
-        width, height = scale
-    height = height//2
+    if scaling:
+        if scaling[0] <= 0 or scaling[1] <= 0:
+            print('Размеры картинок должны быть положительными')
+            exit(-12)
+        else:
+            width, height = scaling
+    print('Подождите немного, скрипт генерирует арт')
+    height = int(height/2) + 1
     resizedImage = image.resize((width, height), Image.ANTIALIAS)
     grayImage = to_greyscale(resizedImage)
     asciiString = pixel_to_ascii50(grayImage) if moreChars else pixel_to_ascii10(grayImage)
@@ -57,7 +67,6 @@ def main():
     filename = args.filename
     scaling = args.scale
     moreChars = args.moreChars
-    print('Подождите немного, скрипт генерирует арт')
     result = convert_image_to_ASCII(filename, scaling, moreChars)
     outFile = args.outFile
     with open(outFile, 'w') as f:
