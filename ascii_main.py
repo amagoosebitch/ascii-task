@@ -1,4 +1,5 @@
 import argparse
+import sys
 from PIL import Image
 
 ASCII_CHARS50 = "$@B%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~<>li!;:,. "
@@ -25,24 +26,14 @@ def pixel_to_ascii50(image):
     return asciiString
 
 
-def convert_image_to_ASCII(filename, scaling, moreChars):
-    try:
-        Image.open(filename)
-    except FileNotFoundError:
-        print("Файл не найден")
-        exit(-11)
-    image = Image.open(filename)
+def convert_image_to_ascii(image, scaling, moreChars):
     width, height = image.size
     if scaling:
-        if scaling[0] <= 0 or scaling[1] <= 0:
-            print('Размеры картинок должны быть положительными')
-            exit(-12)
-        else:
-            width, height = scaling
-    print('Подождите немного, скрипт генерирует арт')
-    height = int(height/2) + 1
-    resizedImage = image.resize((width, height), Image.ANTIALIAS)
-    grayImage = to_greyscale(resizedImage)
+        width, height = scaling
+    else:
+        height = int(height / 2) + 1
+    image = image.resize((width, height), Image.ANTIALIAS)
+    grayImage = to_greyscale(image)
     asciiString = pixel_to_ascii50(grayImage) if moreChars else pixel_to_ascii10(grayImage)
     length = len(asciiString)
     result = []
@@ -51,7 +42,7 @@ def convert_image_to_ASCII(filename, scaling, moreChars):
     return result
 
 
-def main():
+def setup_and_parse(input):
     parser = argparse.ArgumentParser(description='Этот скрипт преобразует картинку в ASCII-art')
     parser.add_argument('--file', required=True, dest='filename',
                         help='Укажите полное или относительное имя файла, который хотите преобразовать')
@@ -61,13 +52,29 @@ def main():
                         help='Укажите имя файла в формате .txt, в котором хотите увидеть результат')
     parser.add_argument('--morechars', action='store_true', required=False, dest='moreChars',
                         help='Используйте этот аргумент, если хотите, чтобы набор символов был разнообразнее')
-    #add_argument('--colored', action='store_true', required=False, dest='isColored',
+    # add_argument('--colored', action='store_true', required=False, dest='isColored',
     #                   help='Используйте этот аргумент, если хотите получить цветной результат')
-    args = parser.parse_args()
-    filename = args.filename
-    scaling = args.scale
-    moreChars = args.moreChars
-    result = convert_image_to_ASCII(filename, scaling, moreChars)
+    args = parser.parse_args(input)
+    return args
+
+
+def check_args(args):
+    try:
+        Image.open(args.filename)
+    except FileNotFoundError:
+        print("Файл не найден")
+        exit(-11)
+    if args.scale and args.scale[0] <= 0 or args.scale[1] <= 0:
+        print('Размеры картинок должны быть положительными')
+        exit(-12)
+
+
+def main():
+    args = setup_and_parse(sys.argv[1:])
+    check_args(args)
+    print('Подождите немного, скрипт генерирует арт')
+    image = Image.open(args.filename)
+    result = convert_image_to_ascii(image, args.scale, args.moreChars)
     outFile = args.outFile
     with open(outFile, 'w') as f:
         f.write('\n'.join(result))
