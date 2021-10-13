@@ -32,7 +32,7 @@ def test_correct_arguments():
 def test_scales_correct():
     args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some.txt'])
     image = Image.open(args.filename)
-    result = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
+    result, resizedImage = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
     assert len(result) == args.scale[1]
     for stroke in result:
         assert len(stroke) == args.scale[0]
@@ -49,7 +49,7 @@ def test_to_grayscale_correct():
 def test_morechars_correct():
     args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some.txt'])
     image = Image.open(args.filename)
-    result = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
+    result, resizedImage = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
     for stroke in result:
         for char in stroke:
             assert char in ascii_main.ASCII_CHARS50
