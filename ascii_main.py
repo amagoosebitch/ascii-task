@@ -66,8 +66,12 @@ def make_colored_image(image, scaling, moreChars):
             if asciiStroke[j] == ' ':
                 temp += asciiStroke[j]
             else:
-                r, g, b = strokeColors[j]
-                temp += f'<span style="color: rgb({r}, {g}, {b}, 1)">' + asciiStroke[j] + '</span>'
+                if len(strokeColors[j]) > 3:
+                    r, g, b, br = strokeColors[j]
+                else:
+                    r, g, b = strokeColors[j]
+                    br = 1
+                temp += f'<span style="color: rgb({r}, {g}, {b}, {br})">' + asciiStroke[j] + '</span>'
         result.append(temp)
     result = HTML_START + result + HTML_END
     return result, resizedImage
