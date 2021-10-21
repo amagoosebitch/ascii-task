@@ -24,7 +24,7 @@ def get_frame(video_capture, sec, count, colored):
     if has_frames:
         img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(img)
-        result, resizedImage = convert_image_to_ascii(pil_image, (720, 240), True) if not colored else make_colored_image(pil_image, (720, 480), True)
+        result, resizedImage = convert_image_to_ascii(pil_image, (203, 48), True) if not colored else make_colored_image(pil_image, (720, 480), True)
         with open(out_file, 'w') as f:
             f.write('\n'.join(result))
     return has_frames
@@ -104,7 +104,7 @@ def make_colored_image(image, scaling, moreChars):
                 else:
                     r, g, b = strokeColors[j]
                     br = 1
-                temp += f'<span style="color: rgb({r}, {g}, {b}, {br})">' + asciiStroke[j] + '</span>'
+                temp += f"<span style=\"color: rgb({r}, {g}, {b}, {br})\">" + asciiStroke[j] + '</span>'
         result.append(temp)
     result = HTML_START + result + HTML_END
     return result, resizedImage
