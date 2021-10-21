@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 from PIL import Image
 import cv2
 
@@ -12,6 +13,7 @@ HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
 
 
 def get_frame(video_capture, sec, count, colored):
+    os.makedirs("frames", exist_ok=True)
     out_file = 'frames/image' + str(count)
     if colored:
         out_file += '.html'
@@ -156,4 +158,4 @@ def main():
 
 if __name__ == '__main__':
     #main()
-    video_to_ascii('gravityfalls.mp4', 0.04, True)
+    video_to_ascii('gravityfalls.mp4', 0.1, False)
