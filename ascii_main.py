@@ -1,6 +1,7 @@
 import argparse
 import sys
 from PIL import Image
+import cv2
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
 ASCII_CHARS10 = "$@%#*+=-:. "
@@ -8,6 +9,36 @@ ASCII_CHARS10 = "$@%#*+=-:. "
 HTML_START = ['<html>', '<head>', '<meta charset="utf-8">', '<style>', 'div {line-height: 1.0;}', '</style>', '</head>',
               '  <body>', '  <div>', '	<p><pre>']
 HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
+
+
+def get_frame(video_capture, sec, count, colored):
+    out_file = 'frames/image' + str(count)
+    if colored:
+        out_file += '.html'
+    else:
+        out_file += '.txt'
+    video_capture.set(cv2.CAP_PROP_POS_MSEC, sec*1000)
+    has_frames, image = video_capture.read()
+    if has_frames:
+        img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(img)
+        result, resizedImage = convert_image_to_ascii(pil_image, (720, 240), True) if not colored else make_colored_image(pil_image, (720, 480), True)
+        with open(out_file, 'w') as f:
+            f.write('\n'.join(result))
+    return has_frames
+
+
+def video_to_ascii(video_path, frame_rate, colored=False):
+    video_capture = cv2.VideoCapture(video_path)
+    sec = 0
+    count = 1
+    success = get_frame(video_capture, sec, count, colored)
+    while success:
+        count = count + 1
+        sec = sec + frame_rate
+        sec = round(sec, 2)
+        success = get_frame(video_capture, sec, count, colored)
+    print('done')
 
 
 def to_greyscale(image):
@@ -124,4 +155,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    video_to_ascii('gravityfalls.mp4', 0.04, True)
