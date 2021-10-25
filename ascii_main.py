@@ -12,9 +12,9 @@ HTML_START = ['<html>', '<head>', '<meta charset="utf-8">', '<style>', 'div {lin
 HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
 
 
-def get_frame(video_capture, sec, count, colored, size):
-    os.makedirs("frames", exist_ok=True)
-    out_file = 'frames/image' + str(count)
+def get_frame(video_capture, sec, count, directory_name, colored, size):
+    os.makedirs(directory_name, exist_ok=True)
+    out_file = f'{directory_name}/image' + str(count)
     if colored:
         out_file += '.html'
     else:
@@ -36,16 +36,16 @@ def get_frame(video_capture, sec, count, colored, size):
     return has_frames
 
 
-def video_to_ascii(video_path, frame_rate=0.1, colored=False, size=False):
+def video_to_ascii(video_path, frame_rate=0.1, directory_name='frames', colored=False, size=False):
     video_capture = cv2.VideoCapture(video_path)
     sec = 0
     count = 1
-    success = get_frame(video_capture, sec, count, colored, size)
+    success = get_frame(video_capture, sec, count, directory_name, colored, size)
     while success:
         count = count + 1
         sec = sec + frame_rate
         sec = round(sec, 2)
-        success = get_frame(video_capture, sec, count, colored, size)
+        success = get_frame(video_capture, sec, count, directory_name, colored, size)
 
 
 def to_greyscale(image):
@@ -54,65 +54,65 @@ def to_greyscale(image):
 
 def pixel_to_ascii10(image):
     pixels = image.getdata()
-    asciiString = ""
+    ascii_string = ""
     for pixel in pixels:
-        asciiString += ASCII_CHARS10[pixel//25]
-    return asciiString
+        ascii_string += ASCII_CHARS10[pixel//25]
+    return ascii_string
 
 
 def pixel_to_ascii50(image):
     pixels = image.getdata()
-    asciiString = ""
+    ascii_string = ""
     for pixel in pixels:
-        asciiString += ASCII_CHARS50[pixel//5]
-    return asciiString
+        ascii_string += ASCII_CHARS50[pixel//5]
+    return ascii_string
 
 
-def convert_image_to_ascii(image, scaling, moreChars):
+def convert_image_to_ascii(image, scaling, more_chars):
     width, height = image.size
     if scaling:
         width, height = scaling
     else:
         height = int(height / 2) + 1
-    resizedImage = image.resize((width, height), Image.ANTIALIAS)
-    grayImage = to_greyscale(resizedImage)
-    asciiString = pixel_to_ascii50(grayImage) if moreChars else pixel_to_ascii10(grayImage)
-    length = len(asciiString)
+    resized_image = image.resize((width, height), Image.ANTIALIAS)
+    gray_image = to_greyscale(resized_image)
+    ascii_string = pixel_to_ascii50(gray_image) if more_chars else pixel_to_ascii10(gray_image)
+    length = len(ascii_string)
     result = []
     for i in range(0, length, width):
-        result.append(asciiString[i:i + width])
-    return result, resizedImage
+        result.append(ascii_string[i:i + width])
+    return result, resized_image
 
 
-def make_colored_image(image, scaling, moreChars):
-    asciiArray, _ = convert_image_to_ascii(image, scaling, moreChars)
+def make_colored_image(image, scaling, more_chars):
+    ascii_array, _ = convert_image_to_ascii(image, scaling, more_chars)
     width, height = image.size
     if scaling:
         width, height = scaling
     else:
         height = int(height / 2) + 1
-    resizedImage = image.resize((width, height), Image.ANTIALIAS)
-    pixels = list(resizedImage.getdata())
+    resized_image = image.resize((width, height), Image.ANTIALIAS)
+    pixels = list(resized_image.getdata())
     pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
 
     result = []
     for i in range(height):
-        strokeColors = pixels[i]
-        asciiStroke = list(asciiArray[i])
+        stroke_colors = pixels[i]
+        ascii_stroke = list(ascii_array[i])
         temp = ''
-        for j in range(len(asciiStroke)):
-            if asciiStroke[j] == ' ':
-                temp += asciiStroke[j]
+        for j in range(len(ascii_stroke)):
+            if ascii_stroke[j] == ' ':
+                temp += ascii_stroke[j]
             else:
-                if len(strokeColors[j]) > 3:
-                    r, g, b, br = strokeColors[j]
+                if len(stroke_colors[j]) > 3:
+                    r, g, b, br = stroke_colors[j]
                 else:
-                    r, g, b = strokeColors[j]
+                    r, g, b = stroke_colors[j]
                     br = 1
-                temp += f"<span style=\"color: rgb({r}, {g}, {b}, {br})\">" + asciiStroke[j] + '</span>'
+                temp += f"<span style=\"color: rgb({r}, {g}, {b}, {br})\">" + ascii_stroke[j] + '</span>'
         result.append(temp)
     result = HTML_START + result + HTML_END
-    return result, resizedImage
+    return result, resized_image
 
 
 def setup_and_parse(input):
@@ -121,16 +121,16 @@ def setup_and_parse(input):
                         help='Укажите полное или относительное имя файла, который хотите преобразовать')
     parser.add_argument('--colored', action='store_true', required=False, dest='isColored',
                         help='Используйте этот аргумент, если хотите получить цветной результат')
+    parser.add_argument('--out', required=False, dest='outFile', default='out',
+                        help='Укажите имя файла(без расширения) или директорию(для видео), куда сохранить результат')
+    parser.add_argument('--morechars', action='store_true', required=False, dest='moreChars',
+                        help='Используйте этот аргумент, если хотите, чтобы набор символов был разнообразнее')
     parser.add_argument('--scale', nargs=2, type=int, required=False, metavar=('width', 'height'), default=None,
                         help='Передаётся 2 аргумента: желаемые ширина и высота результата в символах')
     parser.add_argument('--video', action='store_true', required=False, dest='convert_to_video',
                         help='Используйте это аргумент, если хотите преобразовать видео в ASCII-art')
-    parser.add_argument('--out', required=False, dest='outFile', default='out',
-                        help='Укажите имя файла в формате .txt, в котором хотите увидеть результат')
-    parser.add_argument('--morechars', action='store_true', required=False, dest='moreChars',
-                        help='Используйте этот аргумент, если хотите, чтобы набор символов был разнообразнее')
-    parser.add_argument('--framerate', type=float, required=False, dest='frame_rate', default=0.1, help='Используйте этот аргумент,'
-                                                                                      'чтобы установить частоту взятия кадра из видео в секундах')
+    parser.add_argument('--framerate', type=float, required=False, dest='frame_rate', default=0.1,
+                        help='Используйте этот аргумент, чтобы установить частоту взятия кадра из видео в секундах')
     args = parser.parse_args(input)
     return args
 
@@ -138,7 +138,10 @@ def setup_and_parse(input):
 def check_args(args):
     try:
         if args.convert_to_video:
-            cv2.VideoCapture(args.filename)
+            video = cv2.VideoCapture(args.filename)
+            if video is None or not video.isOpened():
+                raise FileNotFoundError
+
         else:
             Image.open(args.filename)
     except FileNotFoundError:
@@ -147,12 +150,9 @@ def check_args(args):
     if not args.convert_to_video and args.frame_rate:
         print('Частоту взятия кадров можно указывать только для видео')
         exit(-15)
-    if args.convert_to_video and args.outFile != 'out':
-        print('Нельзя изменить папку по умолчанию: "frames"')
-        exit(-13)
     if args.frame_rate and args.frame_rate <= 0:
         print('Частота взятия кадров должна быть положительной')
-        exit(-14)
+        exit(-13)
     if args.scale:
         if args.scale[0] <= 0 or args.scale[1] <= 0:
             print('Размеры должны быть положительными')
@@ -163,21 +163,22 @@ def main():
     args = setup_and_parse(sys.argv[1:])
     check_args(args)
     print('Подождите немного, скрипт генерирует арт')
-    outFile = args.outFile
+    out_file = args.outFile
     if args.convert_to_video:
-        outFile = 'папку frames'
-        video_to_ascii(args.filename, args.frame_rate, args.isColored, args.scale)
+        out_directory = out_file + 'Frames'
+        out_file = f'папку {out_directory}'
+        video_to_ascii(args.filename, args.frame_rate, out_directory, args.isColored, args.scale)
     else:
         image = Image.open(args.filename)
         if args.isColored:
-            result, resizedImage = make_colored_image(image, args.scale, args.moreChars)
-            outFile += '.html'
+            result, resized_image = make_colored_image(image, args.scale, args.moreChars)
+            out_file += '.html'
         else:
-            result, resizedImage = convert_image_to_ascii(image, args.scale, args.moreChars)
-            outFile += '.txt'
-        with open(outFile, 'w') as f:
+            result, resized_image = convert_image_to_ascii(image, args.scale, args.moreChars)
+            out_file += '.txt'
+        with open(out_file, 'w') as f:
             f.write('\n'.join(result))
-    print(f'Результат записан в {outFile}')
+    print(f'Результат записан в {out_file}')
 
 
 if __name__ == '__main__':
