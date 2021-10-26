@@ -129,7 +129,7 @@ def setup_and_parse(input):
                         help='Передаётся 2 аргумента: желаемые ширина и высота результата в символах')
     parser.add_argument('--video', action='store_true', required=False, dest='convert_to_video',
                         help='Используйте это аргумент, если хотите преобразовать видео в ASCII-art')
-    parser.add_argument('--framerate', type=float, required=False, dest='frame_rate', default=0.1,
+    parser.add_argument('--framerate', type=float, required=False, dest='frame_rate',
                         help='Используйте этот аргумент, чтобы установить частоту взятия кадра из видео в секундах')
     args = parser.parse_args(input)
     return args
