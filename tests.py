@@ -15,6 +15,10 @@ def test_wrong_filename_for_image():
     pattern_for_exit_tests(['--file', 'someweird.argument'], -11)
 
 
+def test_wrong_directory_for_play():
+    pattern_for_exit_tests(['--play', 'someNotFoundDirectory'], -11)
+
+
 def test_wrong_filename_for_video():
     pattern_for_exit_tests(['--file', 'someweird.argument', '--video'], -11)
 
@@ -31,6 +35,10 @@ def test_wrong_scaling():
     pattern_for_exit_tests(['--file', 'cat.jpg', '--scale', '-10', '0'], -12)
 
 
+def test_too_much_args_for_play():
+    pattern_for_exit_tests(['--file', 'somefile', '--scale', '1', '1', '--play', 'outFrames'], -16)
+
+
 def test_correct_arguments1():
     args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
     try:
@@ -44,6 +52,16 @@ def test_correct_arguments1():
 def test_correct_arguments2():
     args = ascii_main.setup_and_parse(
         ['--file', 'gravityfalls.mp4', '--scale', '40', '40', '--morechars', '--video'])
+    try:
+        ascii_main.check_args(args)
+        exitFlag = False
+    except SystemExit:
+        exitFlag = True
+    assert exitFlag == False
+
+
+def test_correct_arguments3():
+    args = ascii_main.setup_and_parse(['--play', 'outFrames'])
     try:
         ascii_main.check_args(args)
         exitFlag = False

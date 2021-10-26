@@ -3,6 +3,7 @@ import sys
 import os
 from PIL import Image
 import cv2
+from time import sleep
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
 ASCII_CHARS10 = "$@%#*+=-:. "
@@ -14,7 +15,7 @@ HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
 
 def get_frame(video_capture, sec, count, directory_name, colored, size):
     os.makedirs(directory_name, exist_ok=True)
-    out_file = f'{directory_name}/image' + str(count)
+    out_file = '{}/image{:02d}'.format(directory_name, count)
     if colored:
         out_file += '.html'
     else:
@@ -115,13 +116,23 @@ def make_colored_image(image, scaling, more_chars):
     return result, resized_image
 
 
+def play_ascii_video(directory):
+    files = [directory + "\\" + f for f in os.listdir(directory) if f.endswith('.txt')]
+    for file in files:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        with open(file) as f:
+            text = f.read()
+            print(text)
+            sleep(0.1)
+
+
 def setup_and_parse(input):
     parser = argparse.ArgumentParser(description='Этот скрипт преобразует картинку в ASCII-art')
-    parser.add_argument('--file', required=True, dest='filename',
+    parser.add_argument('--file', required=False, dest='filename',
                         help='Укажите полное или относительное имя файла, который хотите преобразовать')
     parser.add_argument('--colored', action='store_true', required=False, dest='isColored',
                         help='Используйте этот аргумент, если хотите получить цветной результат')
-    parser.add_argument('--out', required=False, dest='outFile', default='out',
+    parser.add_argument('--out', required=False, dest='outFile',
                         help='Укажите имя файла(без расширения) или директорию(для видео), куда сохранить результат')
     parser.add_argument('--morechars', action='store_true', required=False, dest='moreChars',
                         help='Используйте этот аргумент, если хотите, чтобы набор символов был разнообразнее')
@@ -131,22 +142,31 @@ def setup_and_parse(input):
                         help='Используйте это аргумент, если хотите преобразовать видео в ASCII-art')
     parser.add_argument('--framerate', type=float, required=False, dest='frame_rate',
                         help='Используйте этот аргумент, чтобы установить частоту взятия кадра из видео в секундах')
+    parser.add_argument('--play', required=False, dest='play_filename',
+                        help='Укажите путь до папки, в которой находится преобразованное ascii видео')
     args = parser.parse_args(input)
     return args
 
 
 def check_args(args):
-    try:
-        if args.convert_to_video:
-            video = cv2.VideoCapture(args.filename)
-            if video is None or not video.isOpened():
-                raise FileNotFoundError
-
-        else:
-            Image.open(args.filename)
-    except FileNotFoundError:
-        print("Файл не найден")
-        sys.exit(-11)
+    if args.play_filename:
+        if not os.path.isdir(args.play_filename):
+            sys.exit(-11)
+        for key, value in args.__dict__.items():
+            if value and key != 'play_filename':
+                print('play может быть только единственным аргументом')
+                sys.exit(-16)
+    else:
+        try:
+            if args.convert_to_video:
+                video = cv2.VideoCapture(args.filename)
+                if video is None or not video.isOpened():
+                    raise FileNotFoundError
+            else:
+                Image.open(args.filename)
+        except FileNotFoundError:
+            print("Файл не найден")
+            sys.exit(-11)
     if not args.convert_to_video and args.frame_rate:
         print('Частоту взятия кадров можно указывать только для видео')
         sys.exit(-15)
@@ -163,11 +183,17 @@ def main():
     args = setup_and_parse(sys.argv[1:])
     check_args(args)
     print('Подождите немного, скрипт генерирует арт')
-    out_file = args.outFile
+    out_file = args.outFile if args.outFile else 'out'
     if args.convert_to_video:
-        out_directory = out_file + 'Frames'
-        out_file = f'папку {out_directory}'
-        video_to_ascii(args.filename, args.frame_rate, out_directory, args.isColored, args.scale)
+        if not args.outFile: out_file += 'Frames'
+        frame_rate = args.frame_rate if args.frame_rate else 0.1
+        video_to_ascii(args.filename, frame_rate, out_file, args.isColored, args.scale)
+        out_file = f'папку {out_file}'
+    elif args.play_filename:
+        play_ascii_video(args.play_filename)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        input("Нажмите любую клавишу чтобы выйти...")
+        sys.exit(0)
     else:
         image = Image.open(args.filename)
         if args.isColored:
