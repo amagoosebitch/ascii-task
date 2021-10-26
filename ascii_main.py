@@ -12,7 +12,7 @@ HTML_START = ['<html>', '<head>', '<meta charset="utf-8">', '<style>', 'div {lin
 HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
 
 
-def get_frame(video_capture, sec, count, colored, size):
+def get_and_write_frame(video_capture, sec, count, colored, size):
     os.makedirs("frames", exist_ok=True)
     out_file = 'frames/image' + str(count)
     if colored:
