@@ -118,6 +118,9 @@ def make_colored_image(image, scaling, more_chars):
 
 def play_ascii_video(directory):
     files = [directory + "\\" + f for f in os.listdir(directory) if f.endswith('.txt')]
+    if len(files) == 0:
+        print('Не обнаружено .txt файлов для анимации')
+        sys.exit(-17)
     for file in files:
         os.system('cls' if os.name == 'nt' else 'clear')
         with open(file) as f:

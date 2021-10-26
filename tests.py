@@ -40,7 +40,7 @@ def test_too_much_args_for_play():
 
 
 def test_correct_arguments1():
-    args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
+    args = ascii_main.setup_and_parse(['--file', 'files/cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
     try:
         ascii_main.check_args(args)
         exitFlag = False
@@ -51,7 +51,7 @@ def test_correct_arguments1():
 
 def test_correct_arguments2():
     args = ascii_main.setup_and_parse(
-        ['--file', 'gravityfalls.mp4', '--scale', '40', '40', '--morechars', '--video'])
+        ['--file', 'files/gravityfalls.mp4', '--scale', '40', '40', '--morechars', '--video'])
     try:
         ascii_main.check_args(args)
         exitFlag = False
@@ -61,7 +61,7 @@ def test_correct_arguments2():
 
 
 def test_correct_arguments3():
-    args = ascii_main.setup_and_parse(['--play', 'outFrames'])
+    args = ascii_main.setup_and_parse(['--play', 'files'])
     try:
         ascii_main.check_args(args)
         exitFlag = False
@@ -71,7 +71,7 @@ def test_correct_arguments3():
 
 
 def test_scales_correct():
-    args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
+    args = ascii_main.setup_and_parse(['--file', 'files/cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
     image = Image.open(args.filename)
     result, resizedImage = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
     assert len(result) == args.scale[1]
@@ -80,7 +80,7 @@ def test_scales_correct():
 
 
 def test_to_grayscale_correct():
-    image = Image.open('cat.jpg')
+    image = Image.open('files/cat.jpg')
     grey_image = ascii_main.to_greyscale(image)
     pixels = grey_image.getdata()
     for pixel in pixels:
@@ -88,9 +88,16 @@ def test_to_grayscale_correct():
 
 
 def test_morechars_correct():
-    args = ascii_main.setup_and_parse(['--file', 'cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
+    args = ascii_main.setup_and_parse(['--file', 'files/cat.jpg', '--scale', '40', '40', '--morechars', '--out', 'some'])
     image = Image.open(args.filename)
     result, resizedImage = ascii_main.convert_image_to_ascii(image, args.scale, args.moreChars)
     for stroke in result:
         for char in stroke:
             assert char in ascii_main.ASCII_CHARS50
+
+
+def test_play_empty_directory():
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        ascii_main.play_ascii_video('files')
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == -17
