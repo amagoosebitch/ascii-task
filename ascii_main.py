@@ -146,17 +146,17 @@ def check_args(args):
             Image.open(args.filename)
     except FileNotFoundError:
         print("Файл не найден")
-        exit(-11)
+        sys.exit(-11)
     if not args.convert_to_video and args.frame_rate:
         print('Частоту взятия кадров можно указывать только для видео')
-        exit(-15)
+        sys.exit(-15)
     if args.frame_rate and args.frame_rate <= 0:
         print('Частота взятия кадров должна быть положительной')
-        exit(-13)
+        sys.exit(-13)
     if args.scale:
         if args.scale[0] <= 0 or args.scale[1] <= 0:
             print('Размеры должны быть положительными')
-            exit(-12)
+            sys.exit(-12)
 
 
 def main():
