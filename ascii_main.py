@@ -40,7 +40,7 @@ def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=Fals
     os.makedirs(directory_name, exist_ok=True)
     video_capture = cv2.VideoCapture(video_path)
     if not frame_rate:
-        frame_rate = video_capture.get(cv2.CAP_PROP_FPS)
+        frame_rate = round(video_capture.get(cv2.CAP_PROP_FPS))
     print(frame_rate)
     with open(os.path.join(directory_name, 'frame_rate.md'), 'w') as f:
         f.write(f'{frame_rate}')
@@ -126,7 +126,7 @@ def play_ascii_video(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.txt')]
     try:
         with open(os.path.join(directory, 'frame_rate.md')) as f:
-            frame_rate = 1/int(f.read())
+            frame_rate = 1/(int(f.read()))
     except FileNotFoundError:
         print('Не обнаружен .md файл с указанием количества кадров в секунду')
     if len(files) == 0:
