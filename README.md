@@ -25,7 +25,10 @@
 python ascii-main.py --file [название файла] [аргументы]
 ```
 ```
-python ascii-main.py -h или python ascii-main/py --help для получения справки об аргументах и возможностях скрипта
+python ascii-main.py -h или python ascii-main/py 
+```
+```
+--help для получения справки об аргументах и возможностях скрипта
 ```
 ```
 python ascii-main.py --play [директория с ascii-кадрами] для проигрывания ascii-видео
