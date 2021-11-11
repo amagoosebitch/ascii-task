@@ -128,7 +128,8 @@ def play_ascii_video(directory):
         with open(os.path.join(directory, 'frame_rate.md')) as f:
             frame_rate = 1/(int(f.read()))
     except FileNotFoundError:
-        print('Не обнаружен .md файл с указанием количества кадров в секунду')
+        print('Не обнаружен frame_rate.md.md файл с указанием количества кадров в секунду')
+        sys.exit(-18)
     if len(files) == 0:
         print('Не обнаружено .txt файлов для анимации')
         sys.exit(-17)

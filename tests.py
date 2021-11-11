@@ -1,5 +1,6 @@
 import pytest
 import ascii_main
+import os
 from PIL import Image
 
 
@@ -97,7 +98,15 @@ def test_morechars_correct():
 
 
 def test_play_empty_directory():
+    directory = 'files'
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        ascii_main.play_ascii_video('files')
+        ascii_main.play_ascii_video(directory)
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == -18
+    with open(os.path.join(directory, 'frame_rate.md'), 'w') as f:
+        f.write('30')
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        ascii_main.play_ascii_video(directory)
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == -17
+    os.remove(os.path.join(directory, 'frame_rate.md'))
