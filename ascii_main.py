@@ -14,8 +14,7 @@ HTML_END = ['</p></pre>', '</div>', '</body>', '</html>']
 
 
 def get_frame(video_capture, sec, count, directory_name, colored, size):
-    os.makedirs(directory_name, exist_ok=True)
-    out_file = '{}/image{:02d}'.format(directory_name, count)
+    out_file = '{}/{:05d}'.format(directory_name, count)
     if colored:
         out_file += '.html'
     else:
@@ -37,8 +36,15 @@ def get_frame(video_capture, sec, count, directory_name, colored, size):
     return has_frames
 
 
-def video_to_ascii(video_path, frame_rate=0.1, directory_name='frames', colored=False, size=False):
+def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=False, size=False):
+    os.makedirs(directory_name, exist_ok=True)
     video_capture = cv2.VideoCapture(video_path)
+    if not frame_rate:
+        frame_rate = video_capture.get(cv2.CAP_PROP_FPS)
+    print(frame_rate)
+    with open(os.path.join(directory_name, 'frame_rate.md'), 'w') as f:
+        f.write(f'{frame_rate}')
+    frame_rate = 1 / frame_rate
     sec = 0
     count = 1
     success = get_frame(video_capture, sec, count, directory_name, colored, size)
@@ -117,7 +123,12 @@ def make_colored_image(image, scaling, more_chars):
 
 
 def play_ascii_video(directory):
-    files = [directory + "\\" + f for f in os.listdir(directory) if f.endswith('.txt')]
+    files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.txt')]
+    try:
+        with open(os.path.join(directory, 'frame_rate.md')) as f:
+            frame_rate = 1/int(f.read())
+    except FileNotFoundError:
+        print('Не обнаружен .md файл с указанием количества кадров в секунду')
     if len(files) == 0:
         print('Не обнаружено .txt файлов для анимации')
         sys.exit(-17)
@@ -126,7 +137,7 @@ def play_ascii_video(directory):
         with open(file) as f:
             text = f.read()
             print(text)
-            sleep(0.1)
+            sleep(frame_rate)
 
 
 def setup_and_parse(input):
@@ -143,7 +154,7 @@ def setup_and_parse(input):
                         help='Передаётся 2 аргумента: желаемые ширина и высота результата в символах')
     parser.add_argument('--video', action='store_true', required=False, dest='convert_to_video',
                         help='Используйте это аргумент, если хотите преобразовать видео в ASCII-art')
-    parser.add_argument('--framerate', type=float, required=False, dest='frame_rate',
+    parser.add_argument('--framerate', type=int, required=False, dest='frame_rate', default=None,
                         help='Используйте этот аргумент, чтобы установить частоту взятия кадра из видео в секундах')
     parser.add_argument('--play', required=False, dest='play_filename',
                         help='Укажите путь до папки, в которой находится преобразованное ascii видео')
@@ -189,7 +200,7 @@ def main():
     out_file = args.outFile if args.outFile else 'out'
     if args.convert_to_video:
         if not args.outFile: out_file += 'Frames'
-        frame_rate = args.frame_rate if args.frame_rate else 0.1
+        frame_rate = args.frame_rate
         video_to_ascii(args.filename, frame_rate, out_file, args.isColored, args.scale)
         out_file = f'папку {out_file}'
     elif args.play_filename:
