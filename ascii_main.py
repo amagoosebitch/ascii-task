@@ -4,6 +4,7 @@ import os
 from PIL import Image
 import cv2
 from time import sleep
+import time
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
 ASCII_CHARS10 = "$@%#*+=-:. "
@@ -41,9 +42,8 @@ def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=Fals
     video_capture = cv2.VideoCapture(video_path)
     if not frame_rate:
         frame_rate = round(video_capture.get(cv2.CAP_PROP_FPS))
-    print(frame_rate)
     with open(os.path.join(directory_name, 'frame_rate.md'), 'w') as f:
-        f.write(f'{frame_rate}')
+        f.write(f"{frame_rate}")
     frame_rate = 1 / frame_rate
     sec = 0
     count = 1
@@ -134,11 +134,14 @@ def play_ascii_video(directory):
         print('Не обнаружено .txt файлов для анимации')
         sys.exit(-17)
     for file in files:
+        start = time.time()
         os.system('cls' if os.name == 'nt' else 'clear')
         with open(file) as f:
             text = f.read()
             print(text)
-            sleep(frame_rate)
+            remaining_time = frame_rate - (time.time() - start)
+            if remaining_time > 0:
+                sleep(remaining_time)
 
 
 def setup_and_parse(input):
