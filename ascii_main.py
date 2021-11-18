@@ -5,6 +5,7 @@ from PIL import Image
 import cv2
 from time import sleep
 import time
+import platform
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
 ASCII_CHARS10 = "$@%#*+=-:. "
@@ -128,18 +129,21 @@ def play_ascii_video(directory):
         with open(os.path.join(directory, 'frame_rate.md')) as f:
             frame_rate = 1/(int(f.read()))
     except FileNotFoundError:
-        print('Не обнаружен frame_rate.md.md файл с указанием количества кадров в секунду')
+        print('Не обнаружен frame_rate.md файл с указанием количества кадров в секунду')
         sys.exit(-18)
     if len(files) == 0:
         print('Не обнаружено .txt файлов для анимации')
         sys.exit(-17)
     for file in files:
-        start = time.time()
-        os.system('cls' if os.name == 'nt' else 'clear')
+        start = time.perf_counter()
+        if platform.system() == "Windows":
+            os.system("cls")
+        else:
+            print("\033c", end="")
         with open(file) as f:
             text = f.read()
             print(text)
-            remaining_time = frame_rate - (time.time() - start)
+            remaining_time = frame_rate - (time.perf_counter() - start)
             if remaining_time > 0:
                 sleep(remaining_time)
 
@@ -209,7 +213,6 @@ def main():
         out_file = f'папку {out_file}'
     elif args.play_filename:
         play_ascii_video(args.play_filename)
-        os.system('cls' if os.name == 'nt' else 'clear')
         input("Нажмите любую клавишу чтобы выйти...")
         sys.exit(0)
     else:
