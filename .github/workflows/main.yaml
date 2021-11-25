@@ -32,8 +32,8 @@ jobs:
       run: |
         pytest --cov=src --cov-report html:cov_html
     - name: Upload pytest-cov test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: pytest-cov-results
-          path: cov_html
-        if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: pytest-cov-results
+        path: cov_html
+      if: ${{ always() }}
