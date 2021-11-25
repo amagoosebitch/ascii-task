@@ -30,4 +30,4 @@ jobs:
         pytest test_main.py
     - name: Check coverage
       run: |
-        pytest --cov=ascii_main.py
+        pytest --cov=src
