@@ -35,5 +35,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: pytest-cov-results
-          path: cov_html/index.html
+          path: cov_html
         if: ${{ always() }}
