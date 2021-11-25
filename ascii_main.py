@@ -6,6 +6,8 @@ import cv2
 from time import sleep
 import time
 import platform
+#random comment
+
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
 ASCII_CHARS10 = "$@%#*+=-:. "
