@@ -42,15 +42,19 @@ def get_frame(video_capture, sec, count, directory_name, colored, size):
 def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=False, size=False):
     os.makedirs(directory_name, exist_ok=True)
     video_capture = cv2.VideoCapture(video_path)
+    total_length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
     if not frame_rate:
         frame_rate = round(video_capture.get(cv2.CAP_PROP_FPS))
     with open(os.path.join(directory_name, 'frame_rate.md'), 'w') as f:
         f.write(f"{frame_rate}")
+
     frame_rate = 1 / frame_rate
+    total_sec = total_length * frame_rate
     sec = 0
     count = 1
     success = get_frame(video_capture, sec, count, directory_name, colored, size)
     while success:
+        print(f'Готово на {int(100*sec / total_sec)}%', end='\r')
         count = count + 1
         sec = sec + frame_rate
         sec = round(sec, 2)
