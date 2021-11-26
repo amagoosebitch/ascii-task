@@ -30,7 +30,7 @@ jobs:
         pytest test_main.py
     - name: Check coverage
       run: |
-        pytest --cov=ascii-task ascii_main.py --cov-report html:cov_html
+        pytest --cov=ascii_main.py --cov-report html:cov_html
     - name: Upload pytest-cov test results
       uses: actions/upload-artifact@v2
       with:
