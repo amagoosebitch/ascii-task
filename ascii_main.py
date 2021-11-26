@@ -147,8 +147,7 @@ def play_ascii_video(directory):
             print("\033c", end="")
         with open(file) as f:
             text = f.read()
-            print(file)
-            #print(text)
+            print(text)
             remaining_time = frame_rate - (time.perf_counter() - start)
             if remaining_time > 0:
                 sleep(remaining_time)
