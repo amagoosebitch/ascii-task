@@ -130,6 +130,7 @@ def make_colored_image(image, scaling, more_chars):
 
 def play_ascii_video(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.txt')]
+    files.sort()
     try:
         with open(os.path.join(directory, 'frame_rate.md')) as f:
             frame_rate = 1/(int(f.read()))
