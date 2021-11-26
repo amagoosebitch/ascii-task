@@ -44,7 +44,7 @@ def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=Fals
     video_capture = cv2.VideoCapture(video_path)
     total_length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
     if not frame_rate:
-        frame_rate = round(video_capture.get(cv2.CAP_PROP_FPS))
+        frame_rate = video_capture.get(cv2.CAP_PROP_FPS)
     with open(os.path.join(directory_name, 'frame_rate.md'), 'w') as f:
         f.write(f"{frame_rate}")
 
@@ -57,7 +57,6 @@ def video_to_ascii(video_path, frame_rate, directory_name='frames', colored=Fals
         print(f'Готово на {int(100*sec / total_sec)}%', end='\r')
         count = count + 1
         sec = sec + frame_rate
-        sec = round(sec, 2)
         success = get_frame(video_capture, sec, count, directory_name, colored, size)
 
 
@@ -131,9 +130,10 @@ def make_colored_image(image, scaling, more_chars):
 def play_ascii_video(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.txt')]
     files.sort()
+    flag = False
     try:
         with open(os.path.join(directory, 'frame_rate.md')) as f:
-            frame_rate = 1/(int(f.read()))
+            frame_rate = 1/(float(f.read()))
     except FileNotFoundError:
         print('Не обнаружен frame_rate.md файл с указанием количества кадров в секунду')
         sys.exit(-18)
@@ -141,17 +141,23 @@ def play_ascii_video(directory):
         print('Не обнаружено .txt файлов для анимации')
         sys.exit(-17)
     for file in files:
-        start = time.perf_counter()
-        if platform.system() == "Windows":
-            os.system("cls")
-        else:
-            print("\033c", end="")
-        with open(file) as f:
-            text = f.read()
-            print(text)
-            remaining_time = frame_rate - (time.perf_counter() - start)
-            if remaining_time > 0:
-                sleep(remaining_time)
+        flag = print_frame(file, frame_rate*2 if flag else frame_rate)
+
+
+def print_frame(frame, time_for_frame):
+    start = time.perf_counter()
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        print("\033c", end="")
+    with open(frame) as f:
+        text = f.read()
+        print(text)
+    remaining_time = time_for_frame - (time.perf_counter() - start)
+    if remaining_time > 0:
+        sleep(remaining_time)
+        return False
+    return True
 
 
 def setup_and_parse(input):
