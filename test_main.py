@@ -1,5 +1,5 @@
 import pytest
-from src import ascii_main
+import ascii_main
 import os
 from PIL import Image
 
