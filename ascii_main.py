@@ -6,7 +6,6 @@ import cv2
 from time import sleep
 import time
 import platform
-#random comment
 
 
 ASCII_CHARS50 = "$@AB%8&WM#*oahkbdpqwmzcvunxrjft()1{}[]?-_+~li!';:,. "
@@ -144,7 +143,8 @@ def play_ascii_video(directory):
             print("\033c", end="")
         with open(file) as f:
             text = f.read()
-            print(text)
+            print(file)
+            #print(text)
             remaining_time = frame_rate - (time.perf_counter() - start)
             if remaining_time > 0:
                 sleep(remaining_time)
